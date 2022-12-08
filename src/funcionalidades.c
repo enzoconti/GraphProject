@@ -653,9 +653,10 @@ void comando11(){
   reg_dados *reg = cria_registro_dados();
   reg_cabecalho *h = cria_registro_cabecalho();
   int rrn_lido, posicao_inserida;
+  double velocidade_tmp;
   vertice vertice_atual;
-  adj_list *lista_adj_atual;
-  aresta *aresta_atual;
+  adj_list lista_adj_atual;
+  aresta aresta_atual;
   vector<adj_list> graph_of_adj_lists;
   scanf("%ms", &nome_arquivo);
 
@@ -663,25 +664,55 @@ void comando11(){
 
   ler_reg_cabecalho(fp,h);
   while(le_arquivo(reg,fp,&rrn_lido) != 0){
+    printf("has readen reg_dados as:\n");
+    printa_registro(reg);
     // criar verticeAtual com reg_dados
+    //debug//printf("creating vertice_atual with cria_vertice_reg\n");
     cria_vertice_reg(reg,&vertice_atual);
     // criar adj_list alAtual com verticeAtual
-    cria_lista_adj(lista_adj_atual,&vertice_atual);
+    //debug//printf("creating lista_adj_atual with cria_lista_ad\nj");
+    lista_adj_atual.v = vertice_atual;
+    
+    //cria_lista_adj(lista_adj_atual,&vertice_atual);
     // inserir alAtual no vector de adj_list (ORDENADAMENTE - GUARDA INDICE DE INSERCAO insertPos)
+    //debug//printf("inserting adj_list with insere_adj_list_no_grafo\n");
     posicao_inserida = insere_adj_list_no_grafo(lista_adj_atual, graph_of_adj_lists);
+    //debug//printf("has inserted and returned posicao_inserida=%d\n",posicao_inserida);
     // buscar reg_dados.idPoPsConectado nos idConectas do vector<adj_list>
+    //debug//printf("calling for loop to search idPoPsConectado\n");
     for(int i=0;i<graph_of_adj_lists.size();i++){
       // se graph_of_adj_lists[i].vertice.idConecta == reg_dados.idPoPsConectado
+      //printf("on iteration %d of the search\n",i);
       if(graph_of_adj_lists[i].v.idConecta == reg->idPoPsConectado){
+        //debug//printf("has found grap_hof_adj_lists[%d].v.idConecta = %d == %d = reg->idPoPsConectado\n",i, graph_of_adj_lists[i].v.idConecta,reg->idPoPsConectado);
         //  cria arestaAtual (verticeAtual,graph_of_adj_lists[i].vertice,reg_dados.velocidade)
-        cria_aresta(aresta_atual, vertice_atual ,graph_of_adj_lists[i].v, reg->velocidade );
+        //debug//printf("creating aresta_atual with cria_aresta\n");
+        velocidade_tmp = reg->velocidade;
+        if(reg->unidadeMedida[0] == 'M') velocidade_tmp/=1024;
+        cria_aresta(aresta_atual, vertice_atual ,graph_of_adj_lists[i].v, velocidade_tmp );
         //  insere arestaAtual em graph_of_adj_lists[pos].lista e graph_of_adj_lists[insertPos].lista (ORDENADAMENTE)
+        //debug//printf("inserindo aresta with insere_aresta_atual\n");
         insere_aresta_atual(graph_of_adj_lists[posicao_inserida].lista, aresta_atual);
         // swap ventra vsai
+        //debug//printf("swapping aresta\n");
         swap_aresta(aresta_atual);
         // insere aresta_atual em graph_of_adj_lists[i].lista
+        //debug//printf("inserting swapped aresta\n");
         insere_aresta_atual(graph_of_adj_lists[i].lista, aresta_atual);
+        break;
       }
+    }
+    //zera lista atual para proxima iteracao
+    //zera_lista_adj(lista_adj_atual);
+  }
+  //debug//printf("outside comando11() major while\n");
+  list<aresta>::iterator it;
+  for(int i=0;i< graph_of_adj_lists.size(); i++){
+    //printf("%ld\n",graph_of_adj_lists[i].lista.size());
+    for(it=graph_of_adj_lists[i].lista.begin();it != graph_of_adj_lists[i].lista.end() ; it++){
+      printf("%d %s %s %s %d %.0lfMbps\n", graph_of_adj_lists[i].v.idConecta, graph_of_adj_lists[i].v.nomePoPs ,
+                                         graph_of_adj_lists[i].v.nomePais, graph_of_adj_lists[i].v.siglaPais,
+                                         it->entrada.idConecta ,it->peso * 1024);
     }
   }
 }

@@ -16,7 +16,7 @@ typedef struct vertice{
 typedef struct aresta{
     vertice saida;
     vertice entrada;
-    int peso;
+    double peso;
 }aresta;
 
 typedef struct adj_list{
@@ -25,10 +25,12 @@ typedef struct adj_list{
 }adj_list;
 
 void cria_vertice_reg(reg_dados* reg, vertice* v);
-void cria_aresta(aresta* a,vertice vsai, vertice ventra, int peso);
+void cria_aresta(aresta& a,vertice vsai, vertice ventra, double peso);
 void cria_lista_adj(adj_list* lista, vertice* vin);
-int insere_adj_list_no_grafo(adj_list* al, vector<adj_list> graph_als);
-void insere_aresta_atual(list<aresta> l, aresta* a);
-void swap_aresta(aresta* a);
+void zera_lista_adj(adj_list& lista);
+int insere_adj_list_no_grafo(adj_list& al, vector<adj_list>& graph_als);
+//int insere_adj_list_no_grafo(adj_list* al, vector<adj_list> graph_als);
+void insere_aresta_atual(list<aresta>& l, aresta& a);
+void swap_aresta(aresta& a);
 
 #endif
