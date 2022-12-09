@@ -20,6 +20,8 @@ e é retornado a string.
 char* separador(char* string){
     static char* endereco_string = NULL;//define uma variável estática que armazena o endereço da posição analisada da stringing
     char* marcador;//define um marcador que aponta para o endereço da posição analisada da string
+    char* comma;
+    comma = (char*) malloc(2* sizeof(char));
 
     if ((string == NULL && endereco_string == NULL)){
         return NULL;
@@ -36,7 +38,7 @@ char* separador(char* string){
 
     if(string[0] == ','){
         endereco_string++;
-        return ",";
+        return comma;
     }
     *marcador = '\0';//substitui a vírgula por um caractere nulo
 

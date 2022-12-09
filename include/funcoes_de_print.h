@@ -14,5 +14,6 @@ void print_falha_processamento_arquivo();
 void print_registro_inexistente();
 void printa_registro(reg_dados* reg);
 void printa_registro_juncao(reg_dados* reg1, reg_dados* reg2);
+void print_falha_grafo();
 
 #endif

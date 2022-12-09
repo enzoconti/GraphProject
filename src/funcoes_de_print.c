@@ -34,6 +34,10 @@ void print_registro_inexistente(){
     printf(ERRO_REG_INEXISTENTE);
 }
 
+void print_falha_grafo(){
+    printf("Falha na execução da funcionalidade.\n");
+}
+
 /*
 
 Função responsável por imprimir os dados de um registro conforme requisitado nas especificações do trabalho. Recebe um
