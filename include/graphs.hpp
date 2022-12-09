@@ -4,6 +4,9 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <limits>
+#include <set>
+#include <algorithm>
 #include "topologiaRede.h"
 #include "funcoes_de_leitura.h"
 using namespace std;
@@ -36,5 +39,7 @@ int insere_adj_list_no_grafo(adj_list al, vector<adj_list>& graph_als);
 void insere_aresta_atual(list<aresta>& l, aresta& a);
 void swap_aresta(aresta& a);
 map<int,adj_list> cria_grafo_do_binario(FILE* fp);
+void dijkstra(map<int, adj_list> grafo, map<int, int>& distancias, map<int, int>& antecessores, int chave_origem);
+//int min_value(list<int> S);
 
 #endif

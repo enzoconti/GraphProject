@@ -1,5 +1,5 @@
 #include "../include/topologiaRede.h"
-#include "../include/funcionalidades.h"
+#include "../include/funcionalidades.hpp"
 
 /*7
 Beatriz Aimee Teixeira Furtado Braga - N°USP 12547934 - 100%
@@ -44,8 +44,11 @@ int main(){
         case 10:
             comando10();
             break;
-            case 11:
+        case 11:
             comando11();
+            break;
+        case 14:
+            comando14();
             break;
     }
     return 0;

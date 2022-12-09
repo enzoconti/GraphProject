@@ -1,4 +1,4 @@
-#include "../include/funcionalidades.h"
+#include "../include/funcionalidades.hpp"
 
 /**
  * @brief Função referente à funcionalidade 1, que lê um arquivo csv registros e grava os dados em um arquivo binário.
@@ -758,5 +758,58 @@ void comando11()
              adj_list_iterator->second.destino->idConecta, adj_list_iterator->second.peso * 1024);
     }
   }
-  return 0;
+  return;
+}
+
+void comando14(){
+
+  char *nome_arquivo;
+  FILE *arquivo_entrada;
+  reg_cabecalho* novo_reg_cabecalho = cria_registro_cabecalho();
+
+  map<int, adj_list> grafo;
+  map<int, int> distancias;
+  map<int, int> antecessores;
+
+  int pops_origem, pops_destino, pops_parada;
+  int dist1, dist2, dist_final;
+  int num_execucoes = 0;
+
+  scanf("%ms", &nome_arquivo);
+  scanf("%d", &num_execucoes);
+
+
+  arquivo_entrada = fopen(nome_arquivo, "rb");
+  if(arquivo_entrada == NULL) { 
+    print_falha_grafo(); 
+    return;
+  }
+  
+  ler_reg_cabecalho(arquivo_entrada, novo_reg_cabecalho);
+
+  if (novo_reg_cabecalho->status[0] != '1'){
+    print_falha_grafo();
+    free(nome_arquivo);
+    free(novo_reg_cabecalho);
+    fclose(arquivo_entrada);
+    return;
+  }
+
+  grafo = cria_grafo_do_binario(arquivo_entrada);
+
+  for(int i = 0; i < num_execucoes; i++){
+    scanf("%d %d %d", &pops_origem, &pops_destino, &pops_parada);
+
+    dijkstra(grafo, distancias, antecessores, pops_origem);
+    dist1 = distancias.at(pops_parada);
+    printf("Distância 1 é: %d\n", dist1);
+
+    //dijkstra(grafo, distancias, antecessores, pops_parada);
+    //dist2 = distancias.at(pops_destino);
+    //printf("Distância 2 é: %d\n", dist2);
+
+    //dist_final = dist1 + dist2;
+
+    //printf("Comprimento do caminho entre %d e %d parando em %d: %d Mbps\n", pops_origem, pops_destino, pops_parada, dist_final);
+  }
 }
