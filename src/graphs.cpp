@@ -118,7 +118,7 @@ GRAFO cria_grafo_do_binario(FILE* fp){
         grafo.nro_vertices = grafo.nro_vertices + 1;
 
         velocidade_tmp = (double)reg->velocidade;
-        if (reg->unidadeMedida[0] == 'M') velocidade_tmp /= 1024;
+        if (reg->unidadeMedida[0] == 'G') velocidade_tmp *= 1024;
         cria_aresta(aresta_atual, &grafo.map_do_grafo.at(lista_adj_atual.v.idConecta).v, &grafo.map_do_grafo.at(vertice_conectado.idConecta).v, velocidade_tmp);
         
 
@@ -143,17 +143,19 @@ GRAFO cria_grafo_do_binario(FILE* fp){
  * @param antecessores map que guarda os antecessores de cada vertice 
  * @param chave_origem chave que representa o vertice de origem para o algoritmo
  */
-void dijkstra(map<int, adj_list> grafo, map<int, int>& distancias, map<int, int>& antecessores, int chave_origem){
+void dijkstra(map<int, adj_list>& grafo, map<int, double>& distancias, map<int, int>& antecessores, int chave_origem){
 
     list<int> nao_visitados;//guarda os vertices ainda não visitados
+    int cont = 0;
 
     int menor_chave_nao_visitada;//marca o próximo vertice a ser visitado
+    double INF = 9999999999;
 
     map<int, adj_list>:: iterator grafo_iterator;
 
     //enquanto não acabar o grafo, insere a key do distancias como idConecta e o valor da distância 99999
     for(grafo_iterator = grafo.begin(); grafo_iterator != grafo.end(); grafo_iterator++){
-        distancias.insert({grafo_iterator->first, 999999});//distancias iniciais a todos vertices
+        distancias.insert({grafo_iterator->first, INF});//distancias iniciais a todos vertices
         antecessores.insert({grafo_iterator->first, -1});//antecessores dos vertices
         nao_visitados.push_back(grafo_iterator->first);//idConecta dos não visitados
     }
@@ -168,13 +170,7 @@ void dijkstra(map<int, adj_list> grafo, map<int, int>& distancias, map<int, int>
         nao_visitados.pop_front();//remove vertice da fila
         visitados.insert(menor_chave_nao_visitada);//insere no visitados o ultimo vertice visitado
 
-       // map<int, int>::iterator teste;
-        map<int, int>::iterator teste_distancias;
-
-        //for(teste = antecessores.begin(); teste != antecessores.end(); teste++){
-            //printf("Vértice: %d ", teste->first);
-            //printf("Antecessor: %d\n", teste->second);
-       // }
+        map<int, double>::iterator teste_distancias;
         
         map<int, aresta>::iterator aresta_iterator;//Define um iterador de arestas
 
@@ -192,13 +188,14 @@ void dijkstra(map<int, adj_list> grafo, map<int, int>& distancias, map<int, int>
             }
         }
 
+        printf("%d° preenchimento de distâncias:\n", cont+1);
         for(teste_distancias = distancias.begin(); teste_distancias != distancias.end(); teste_distancias++){
             printf("Vértice: %d ", teste_distancias->first);
-            printf("Distancia: %d\n ", teste_distancias->second);
+            printf("Distancia: %.0lf\n\n", teste_distancias->second);
         }
+        cont++;
     }
 }
-
 int busca_em_profundidade(GRAFO& grafo){
     int numero_arestas_arvore=0;
     //printf("chamando a primeira recursao de _busca_em_profundidade com numero_arestas_arvore=%d\n", numero_arestas_arvore);

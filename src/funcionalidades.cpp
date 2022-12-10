@@ -806,7 +806,7 @@ void comando14(){
   reg_cabecalho* novo_reg_cabecalho = cria_registro_cabecalho();
 
   GRAFO grafo;
-  map<int, int> distancias;
+  map<int, double> distancias;
   map<int, int> antecessores;
 
   int pops_origem, pops_destino, pops_parada;
@@ -839,16 +839,15 @@ void comando14(){
     scanf("%d %d %d", &pops_origem, &pops_destino, &pops_parada);
 
     dijkstra(grafo.map_do_grafo, distancias, antecessores, pops_origem);
+    
     dist1 = distancias.at(pops_parada);
     printf("Distância 1 é: %d\n", dist1);
 
-    //dijkstra(grafo, distancias, antecessores, pops_parada);
-    //dist2 = distancias.at(pops_destino);
-    //printf("Distância 2 é: %d\n", dist2);
+    dist_final = dist1 + dist2;
 
-    //dist_final = dist1 + dist2;
+    dist_final = dist1 + dist2;
 
-    //printf("Comprimento do caminho entre %d e %d parando em %d: %d Mbps\n", pops_origem, pops_destino, pops_parada, dist_final);
+    printf("Comprimento do caminho entre %d e %d parando em %d: %d Mbps\n", pops_origem, pops_destino, pops_parada, dist_final);
   }
   
 }
