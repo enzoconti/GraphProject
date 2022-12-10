@@ -725,7 +725,53 @@ void comando11()
   char *nome_arquivo;
   FILE *fp;
   reg_cabecalho *h = cria_registro_cabecalho();
-  map<int, adj_list> grafo;
+  GRAFO g;
+
+  scanf("%ms", &nome_arquivo);
+
+  fp = fopen(nome_arquivo, "rb");
+  if(fp == NULL) { 
+    print_falha_grafo(); 
+    return;
+  }
+  
+  ler_reg_cabecalho(fp, h);
+  if (h->status[0] != '1')
+  {
+    print_falha_grafo();
+    free(nome_arquivo);
+    free(h);
+    fclose(fp);
+    return;
+  }
+
+  g = cria_grafo_do_binario(fp);
+
+  map<int, adj_list>::iterator graph_iterator;
+  map<int, aresta>::iterator adj_list_iterator;
+  for (graph_iterator = g.map_do_grafo.begin(); graph_iterator != g.map_do_grafo.end(); graph_iterator++)
+  {
+    for (adj_list_iterator = graph_iterator->second.lista_de_arestas.begin(); adj_list_iterator != graph_iterator->second.lista_de_arestas.end(); adj_list_iterator++)
+    {
+      printf("%d %s %s %s %d %.0lfMbps\n", graph_iterator->second.v.idConecta, graph_iterator->second.v.nomePoPs,
+             graph_iterator->second.v.nomePais, graph_iterator->second.v.siglaPais,
+             adj_list_iterator->second.destino->idConecta, adj_list_iterator->second.peso * 1024);
+    }
+  }
+
+  free(nome_arquivo);
+  free(h);
+  fclose(fp);
+
+  return;
+}
+
+void comando12(){
+  char *nome_arquivo;
+  FILE *fp;
+  reg_cabecalho *h = cria_registro_cabecalho();
+  GRAFO grafo;
+  int numero_ciclos;
 
   scanf("%ms", &nome_arquivo);
 
@@ -747,27 +793,19 @@ void comando11()
 
   grafo = cria_grafo_do_binario(fp);
 
-  map<int, adj_list>::iterator graph_iterator;
-  map<int, aresta>::iterator adj_list_iterator;
-  for (graph_iterator = grafo.begin(); graph_iterator != grafo.end(); graph_iterator++)
-  {
-    for (adj_list_iterator = graph_iterator->second.lista_de_arestas.begin(); adj_list_iterator != graph_iterator->second.lista_de_arestas.end(); adj_list_iterator++)
-    {
-      printf("%d %s %s %s %d %.0lfMbps\n", graph_iterator->second.v.idConecta, graph_iterator->second.v.nomePoPs,
-             graph_iterator->second.v.nomePais, graph_iterator->second.v.siglaPais,
-             adj_list_iterator->second.destino->idConecta, adj_list_iterator->second.peso * 1024);
-    }
-  }
+  numero_ciclos = busca_em_profundidade(grafo);
+
+  printCiclos(numero_ciclos);
+
   return;
 }
 
 void comando14(){
-
   char *nome_arquivo;
   FILE *arquivo_entrada;
   reg_cabecalho* novo_reg_cabecalho = cria_registro_cabecalho();
 
-  map<int, adj_list> grafo;
+  GRAFO grafo;
   map<int, int> distancias;
   map<int, int> antecessores;
 
@@ -800,7 +838,7 @@ void comando14(){
   for(int i = 0; i < num_execucoes; i++){
     scanf("%d %d %d", &pops_origem, &pops_destino, &pops_parada);
 
-    dijkstra(grafo, distancias, antecessores, pops_origem);
+    dijkstra(grafo.map_do_grafo, distancias, antecessores, pops_origem);
     dist1 = distancias.at(pops_parada);
     printf("Distância 1 é: %d\n", dist1);
 
@@ -812,4 +850,5 @@ void comando14(){
 
     //printf("Comprimento do caminho entre %d e %d parando em %d: %d Mbps\n", pops_origem, pops_destino, pops_parada, dist_final);
   }
+  
 }

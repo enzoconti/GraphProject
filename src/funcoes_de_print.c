@@ -38,6 +38,10 @@ void print_falha_grafo(){
     printf("Falha na execução da funcionalidade.\n");
 }
 
+void printCiclos(int n){
+    printf("Quantidade de ciclos: %d\n", n);
+}
+
 /*
 
 Função responsável por imprimir os dados de um registro conforme requisitado nas especificações do trabalho. Recebe um

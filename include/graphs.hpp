@@ -11,23 +11,34 @@
 #include "funcoes_de_leitura.h"
 using namespace std;
 
+enum COR {branco, cinza, preto};
+enum classificacao{sem_classificacao, arvore, retorno};
+
 typedef struct vertice{
     int idConecta;
     char nomePoPs[TAM_MAX_CAMPO_VARIAVEL];
     char nomePais[TAM_MAX_CAMPO_VARIAVEL];
     char siglaPais[3];
+    COR classificacao_vertice;
 }vertice;
 
 typedef struct aresta{
     vertice *origem;
     vertice *destino;
     double peso;
+    classificacao classificacao_aresta;
 }aresta;
 
 typedef struct adj_list{
     vertice v;
     map<int,aresta> lista_de_arestas;
 }adj_list;
+
+typedef struct grafo_em_struct{
+    int nro_arestas=0;
+    int nro_vertices=0;
+    map<int, adj_list> map_do_grafo;
+}GRAFO;
 
 
 void cria_vertice_reg(reg_dados* reg, vertice& v);
@@ -38,8 +49,10 @@ int insere_adj_list_no_grafo(adj_list al, vector<adj_list>& graph_als);
 //int insere_adj_list_no_grafo(adj_list* al, vector<adj_list> graph_als);
 void insere_aresta_atual(list<aresta>& l, aresta& a);
 void swap_aresta(aresta& a);
-map<int,adj_list> cria_grafo_do_binario(FILE* fp);
+GRAFO cria_grafo_do_binario(FILE* fp);
 void dijkstra(map<int, adj_list> grafo, map<int, int>& distancias, map<int, int>& antecessores, int chave_origem);
+int busca_em_profundidade(GRAFO& grafo);
+void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore);
 //int min_value(list<int> S);
 
 #endif

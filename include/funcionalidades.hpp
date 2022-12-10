@@ -25,6 +25,7 @@ void comando8();
 void comando9();
 void comando10();
 void comando11();
+void comando12();
 void comando14();
 
 #endif

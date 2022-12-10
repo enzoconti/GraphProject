@@ -47,6 +47,9 @@ int main(){
         case 11:
             comando11();
             break;
+        case 12:
+            comando12();
+            break;
         case 14:
             comando14();
             break;
