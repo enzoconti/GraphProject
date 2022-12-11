@@ -118,7 +118,7 @@ GRAFO cria_grafo_do_binario(FILE* fp){
         grafo.nro_vertices = grafo.nro_vertices + 1;
 
         velocidade_tmp = (double)reg->velocidade;
-        if (reg->unidadeMedida[0] == 'G') velocidade_tmp *= 1024;
+        if (reg->unidadeMedida[0] == 'M') velocidade_tmp /= 1024;
         cria_aresta(aresta_atual, &grafo.map_do_grafo.at(lista_adj_atual.v.idConecta).v, &grafo.map_do_grafo.at(vertice_conectado.idConecta).v, velocidade_tmp);
         
 
@@ -199,8 +199,17 @@ void dijkstra(map<int, adj_list>& grafo, map<int, double>& distancias, map<int, 
 int busca_em_profundidade(GRAFO& grafo){
     int numero_arestas_arvore=0;
     //printf("chamando a primeira recursao de _busca_em_profundidade com numero_arestas_arvore=%d\n", numero_arestas_arvore);
-     _busca_em_profundidade(grafo, grafo.map_do_grafo.begin()->first,numero_arestas_arvore); // busca com a chave do primeiro vertica do grafo
-     printf("_busca_em_profundidade retorno numero_arestas_arvore=%d, grafo tem %d arestas\n", numero_arestas_arvore, grafo.nro_arestas);
+     //_busca_em_profundidade(grafo, grafo.map_do_grafo.begin()->first,numero_arestas_arvore); // busca com a chave do primeiro vertica do grafo
+
+    for(auto it= grafo.map_do_grafo.begin(); it != grafo.map_do_grafo.end(); it++){
+        if(it->second.v.classificacao_vertice == branco){
+            _busca_em_profundidade(grafo, it->second.v.idConecta, numero_arestas_arvore);
+            printf("_busca_em_profundidade retorno numero_arestas_arvore=%d, grafo tem %d arestas\n", numero_arestas_arvore, grafo.nro_arestas);
+        }
+    }
+
+
+     printf("_busca_em_profundidade final retornou numero_arestas_arvore=%d, grafo tem %d arestas\n", numero_arestas_arvore, grafo.nro_arestas);
      return grafo.nro_arestas - numero_arestas_arvore;
 }
 
@@ -209,16 +218,18 @@ void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore)
     printf("_busca_em_profundidade iniciando com numero_arestas_arvore=%d\n", numero_arestas_arvore);
 
     // definimos um iterador que percorre a lista de arestas do vertice atual
+    printf("comecamos a percorrer a lista de arestas do vertice %d\n", chave);
     for(auto iterador_arestas = grafo.map_do_grafo.at(chave).lista_de_arestas.begin(); iterador_arestas != grafo.map_do_grafo.at(chave).lista_de_arestas.end(); iterador_arestas++ ){
         // se o destino daquela aresta nao for um vertice preto(indicando que a aresta ainda nao foi percorrida), visitamos esse vertice de destino
         printf("dentro do for do _busca_em_profundidade, antes do if vertice_atual==branco\n");
-        if(grafo.map_do_grafo.at(iterador_arestas->second.destino->idConecta).v.classificacao_vertice == branco){
+        printf("a chave de busca dentro de map_do_grafo.at() eh %d e o .first=%d\n",iterador_arestas->second.destino->idConecta, iterador_arestas->first);
+        if(grafo.map_do_grafo.at(iterador_arestas->first).v.classificacao_vertice == branco){
 
             // antes de visitar o vertice nao_visitado(classificacao != preto) precisamos atualizar a classificacao da aresta que estamos percorrendo pela primeira vez
             // so atualizamos a classificacao da aresta se a aresta ainda nao tem classificacao
             // o acesso desse if eh feito da seguinte forma: acessa-se a lista_de_arestas do adj_list com chave igual a chave da origem do iterador de arestas
             // nessa lista, busca-se a aresta com chave igual ao destino do iterador de arestas
-
+            printf("dentro do ==branco, antes do if aresta == sem classificacao");
             if(grafo.map_do_grafo.at(iterador_arestas->second.origem->idConecta).lista_de_arestas.at(iterador_arestas->second.destino->idConecta).classificacao_aresta == sem_classificacao){
                 // a classificacao da aresta depende da classificacao atual do vertica de destino
                 // se o vertice de destino tiver classificacao atual como branco, a aresta eh uma aresta de arvore

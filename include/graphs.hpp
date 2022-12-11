@@ -20,14 +20,14 @@ typedef struct vertice{
     char nomePoPs[TAM_MAX_CAMPO_VARIAVEL];
     char nomePais[TAM_MAX_CAMPO_VARIAVEL];
     char siglaPais[3];
-    COR classificacao_vertice;
+    COR classificacao_vertice=branco;
 }vertice;
 
 typedef struct aresta{
     vertice *origem;
     vertice *destino;
     double peso;
-    classificacao classificacao_aresta;
+    classificacao classificacao_aresta=sem_classificacao;
 }aresta;
 
 typedef struct adj_list{
