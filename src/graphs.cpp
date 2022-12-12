@@ -1,68 +1,41 @@
 #include "../include/graphs.hpp"
 
+
+/**
+ * @brief funcao simples que cria vertice alocado a partir das informacoes de um registro de dados
+ * 
+ * @param reg registro de dados lido do arquivo e salvo em RAM
+ * @param v vertice que representa o registor lido
+ */
 void cria_vertice_reg(reg_dados* reg, vertice& v){
     v.idConecta = reg->idConecta;
     strcpy(v.nomePais,reg->nomePais);
     strcpy(v.nomePoPs,reg->nomePoPs);
     strcpy(v.siglaPais,reg->siglaPais);
-    v.classificacao_vertice = branco;
+    v.classificacao_vertice = branco; // todos vertices comecam como brancos(nao descobertos)
 }
 
-void cria_lista_adj(adj_list* lista, vertice* vin){
-    lista = (adj_list*) calloc(1,sizeof(adj_list));
-    lista->v = *vin;
-}
 
-void zera_lista_adj(adj_list& lista_a_zerar){
-    //lista_a_zerar.lista.clear();
-    lista_a_zerar.v.idConecta = -1;
-    lista_a_zerar.v.nomePais[0] = '\0';
-    lista_a_zerar.v.nomePoPs[0] = '\0';
-    lista_a_zerar.v.siglaPais[0] = '\0';
-}
-
-int insere_adj_list_no_grafo(adj_list al, vector<adj_list>& graph_als){
-    int pos=0;
-    
-    auto it = graph_als.begin();
-    // busca posicao para insercao
-    //debug//printf("about to start insere_adj_list_no_grafo loop\n");
-    for(;it != graph_als.end();it++){
-        //printf("comparing idConectas to insert with pos=%d\n",pos);
-        if( al.v.idConecta <= it->v.idConecta){
-            graph_als.insert(it,al);
-            //debug//printf("has inserted and now returning pos=%d\n",pos);
-            return pos;
-        }
-        pos++;
-    }
-    //debug//printf("got outside of insere_adj_list_no_grafo loop\n");
-    graph_als.push_back(al);
-    //debug//printf("has pushed back\n");
-    return graph_als.size() - 1;
-    
-    /*
-   for(adj_list adj_list_tmp : graph_als){
-        if(al.v.idConecta <= adj_list_tmp.v.idConecta){
-            graph_als.insert(adj_list_tmp,al);
-            return pos;
-        }
-
-        pos++
-   }
-   */
-
-   graph_als.push_back(al);
-   return graph_als.size() - 1;
-}
-
+/**
+ * @brief funcao simples que cria uma aresta ja alocada dado um par ordenado de vertices e um peso
+ * 
+ * @param a aresta a ser definida
+ * @param v_origem vertice de origem
+ * @param v_destino vertice de destino
+ * @param peso peso da aresta
+ */
 void cria_aresta(aresta& a,vertice *v_origem, vertice *v_destino, double peso){
     a.destino = v_destino;
     a.origem = v_origem;
     a.peso = peso;
-    a.classificacao_aresta = sem_classificacao;
+    a.classificacao_aresta = sem_classificacao; // todas arestas sao padronizadas como sem_classificacao ao serem criadas
 }
 
+/**
+ * @brief funcao simples que swappa a origem e o destino de uma aresta
+ * 
+ * @param a aresta onde ocorrera o swap
+ */
 void swap_aresta(aresta& a){
     vertice *tmp;
     tmp = a.destino;
@@ -70,18 +43,12 @@ void swap_aresta(aresta& a){
     a.origem = tmp;
 }
 
-void insere_aresta_atual(list<aresta>& l, aresta& a){
-    
-    auto it = l.begin();
-    for(; it != l.end(); it++){
-        if(a.origem->idConecta <= it->origem->idConecta){
-            l.insert(it,a);
-            return;
-        }
-    }
-    l.push_back(a);
-}
-
+/**
+ * @brief funcao que cria a estrutura de um grafo a partir de um arquivo binario
+ * 
+ * @param fp ponteiro para o arquivo ja aberto a ser lido
+ * @return GRAFO 
+ */
 GRAFO cria_grafo_do_binario(FILE* fp){
 
     reg_dados *reg = cria_registro_dados();
@@ -94,43 +61,47 @@ GRAFO cria_grafo_do_binario(FILE* fp){
 
 
     while (le_arquivo(reg, fp, &rrn_lido) != 0){
-        // debug//printf("has readen reg_dados as:\n");
-        // debug//printa_registro(reg);
-        //  criar verticeAtual com reg_dados
-        // debug//printf("creating vertice_atual with cria_vertice_reg\n");
         cria_vertice_reg(reg, vertice_atual);
-        // criar adj_list alAtual com verticeAtual
-        // debug//printf("creating lista_adj_atual with cria_lista_ad\nj");
         lista_adj_atual.v = vertice_atual;
 
-        // debug//printf("inserting lista_adj_atual on graph\n");
         auto insert_flag = grafo.map_do_grafo.insert(pair<int, adj_list>(lista_adj_atual.v.idConecta, lista_adj_atual));
-        if (insert_flag.second == false)
-        { // already existed because we inserted it but it is not yet complete
-        grafo.map_do_grafo.at(lista_adj_atual.v.idConecta).v = lista_adj_atual.v;
-        }
-        // grafo.insert({lista_adj_atual.v.idConecta, lista_adj_atual});
+        if (insert_flag.second == false){ 
+        // se tentamos inserir e nao conseguimos(como os arquivos nao tem chaves repetidas) eh pq ja haviamos inserido
+        // mas, no nosso algoritmo, isso significa que inserimos a chave e as arestas sem ter todas informacoes sobre o vertice(poi so registro ainda nao havia sido lido)
+        // entao, atualizamos o vertice com todas as informacoes do registro
 
+            grafo.map_do_grafo.at(lista_adj_atual.v.idConecta).v = lista_adj_atual.v;
+        }
+        
+        // criamos incompletamente o vertice que esta conectado com o vertice que foi lido do registro
         vertice_conectado.idConecta = reg->idPoPsConectado;
         lista_adj_conectada.v = vertice_conectado;
-        if (vertice_conectado.idConecta != -1){ // so adicionamos as arestas que
-        grafo.map_do_grafo.insert(pair<int, adj_list>(lista_adj_conectada.v.idConecta, lista_adj_conectada));
-        grafo.nro_vertices = grafo.nro_vertices + 1;
+        if (vertice_conectado.idConecta != -1){ // so adicionamos os vertices conectados que tem valor nao nulo de chave
+            grafo.map_do_grafo.insert(pair<int, adj_list>(lista_adj_conectada.v.idConecta, lista_adj_conectada));
+            grafo.nro_vertices = grafo.nro_vertices + 1; 
 
-        velocidade_tmp = (double)reg->velocidade;
-        if (reg->unidadeMedida[0] == 'M') velocidade_tmp /= 1024;
-        cria_aresta(aresta_atual, &grafo.map_do_grafo.at(lista_adj_atual.v.idConecta).v, &grafo.map_do_grafo.at(vertice_conectado.idConecta).v, velocidade_tmp);
-        
+            velocidade_tmp = (double)reg->velocidade;
+            if (reg->unidadeMedida[0] == 'G') velocidade_tmp *= 1024; // converte tudo para Mbps
 
-        // debug//printf("inserting aresta_atual on graph\n");
-        grafo.map_do_grafo.at(aresta_atual.origem->idConecta).lista_de_arestas.insert({aresta_atual.destino->idConecta, aresta_atual});
-        grafo.nro_arestas = grafo.nro_arestas + 1;
+            // cria a aresta com a origem e destino e a insere
+            cria_aresta(aresta_atual, &grafo.map_do_grafo.at(lista_adj_atual.v.idConecta).v, &grafo.map_do_grafo.at(vertice_conectado.idConecta).v, velocidade_tmp);
 
-        swap_aresta(aresta_atual); // troca destino com origem
-        // debug//printf("inserting aresta_atual_swapped on graph\n");
-        grafo.map_do_grafo.at(aresta_atual.origem->idConecta).lista_de_arestas.insert({aresta_atual.destino->idConecta, aresta_atual});
+
+            // insere a aresta na adj_list do vertice de origem
+            // i.e, buscamos a chave do vertice de origem da aresta_atual e inserimos em sua lista_de_arestas o par formado pela chave do vertice de destino e a aresta_atual
+            grafo.map_do_grafo.at(aresta_atual.origem->idConecta).lista_de_arestas.insert({aresta_atual.destino->idConecta, aresta_atual});
+            grafo.nro_arestas = grafo.nro_arestas + 1;
+
+            swap_aresta(aresta_atual); // troca destino com origem
+            
+            // repete a mesma insercao, mas com destino e origem trocados
+            // ou seja, se antes inserimos a aresta (x,y) na lista de adjacencias do vertica x, agora inserimos (y,x) na lista de adjacenca do vertice y
+
+            grafo.map_do_grafo.at(aresta_atual.origem->idConecta).lista_de_arestas.insert({aresta_atual.destino->idConecta, aresta_atual});
         }
     }
+
+    // retornamos o grafo construido
     return grafo;
 }
 
@@ -196,59 +167,62 @@ void dijkstra(map<int, adj_list>& grafo, map<int, double>& distancias, map<int, 
         cont++;
     }
 }
+/**
+ * @brief funcao master que comanda a busca_em_profundidade, chama a funcao recursiva da busca em profundidade cada vez que encontra um vertice branco
+ * 
+ * @param grafo grafo a ser performada a busca
+ * @return int numero de ciclos no grafo(que eh igual ao numero de arestas de retorno)
+ */
 int busca_em_profundidade(GRAFO& grafo){
-    int numero_arestas_arvore=0;
-    //printf("chamando a primeira recursao de _busca_em_profundidade com numero_arestas_arvore=%d\n", numero_arestas_arvore);
-     //_busca_em_profundidade(grafo, grafo.map_do_grafo.begin()->first,numero_arestas_arvore); // busca com a chave do primeiro vertica do grafo
+    int numero_arestas_arvore=0; 
 
+    // definimos um iterador que percorre o grafo todo e chama a usca em profundidade recursiva a cada vez que encontra um vertice branco
+    // dessa forma, garante-se que todas possiveis partes desconexas do grafo serao percorridass
     for(auto it= grafo.map_do_grafo.begin(); it != grafo.map_do_grafo.end(); it++){
         if(it->second.v.classificacao_vertice == branco){
             _busca_em_profundidade(grafo, it->second.v.idConecta, numero_arestas_arvore);
-            printf("_busca_em_profundidade retorno numero_arestas_arvore=%d, grafo tem %d arestas\n", numero_arestas_arvore, grafo.nro_arestas);
         }
     }
 
-
-     printf("_busca_em_profundidade final retornou numero_arestas_arvore=%d, grafo tem %d arestas\n", numero_arestas_arvore, grafo.nro_arestas);
+    // o numero de ciclos que deve ser retornado eh igual ao numero total de arestas menos o numero de arestas de arvore, ja que o grafo eh nao direcionado
      return grafo.nro_arestas - numero_arestas_arvore;
 }
 
+/**
+ * @brief funcao recursiva que realiza a busca em profundidade no grafo, percorrendo vertice a vertice em cada chamada
+ * 
+ * @param grafo grafo a ser performada a busca
+ * @param chave chave do vertice atual(a partir da qual este eh buscado no map do grafo)
+ * @param numero_arestas_arvore contador de arestas de arvore acumulado durante a busca em profundidade
+ */
 void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore){
-    grafo.map_do_grafo.at(chave).v.classificacao_vertice = cinza; // comecamos setando o vertice em que estamos como cinza, ja que ele foi descoberto
-    printf("_busca_em_profundidade iniciando com numero_arestas_arvore=%d\n", numero_arestas_arvore);
+    // comecamos setando o vertice em que estamos como cinza, ja que ele foi descoberto
+    grafo.map_do_grafo.at(chave).v.classificacao_vertice = cinza; 
+    
 
     // definimos um iterador que percorre a lista de arestas do vertice atual
-    printf("comecamos a percorrer a lista de arestas do vertice %d\n", chave);
     for(auto iterador_arestas = grafo.map_do_grafo.at(chave).lista_de_arestas.begin(); iterador_arestas != grafo.map_do_grafo.at(chave).lista_de_arestas.end(); iterador_arestas++ ){
         // se o destino daquela aresta nao for um vertice preto(indicando que a aresta ainda nao foi percorrida), visitamos esse vertice de destino
-        printf("dentro do for do _busca_em_profundidade, antes do if vertice_atual==branco\n");
-        printf("a chave de busca dentro de map_do_grafo.at() eh %d e o .first=%d\n",iterador_arestas->second.destino->idConecta, iterador_arestas->first);
         if(grafo.map_do_grafo.at(iterador_arestas->first).v.classificacao_vertice == branco){
 
-            // antes de visitar o vertice nao_visitado(classificacao != preto) precisamos atualizar a classificacao da aresta que estamos percorrendo pela primeira vez
+            // antes de visitar o vertice nao_visitado(classificacao == branco) precisamos atualizar a classificacao da aresta que estamos percorrendo pela primeira vez
             // so atualizamos a classificacao da aresta se a aresta ainda nao tem classificacao
             // o acesso desse if eh feito da seguinte forma: acessa-se a lista_de_arestas do adj_list com chave igual a chave da origem do iterador de arestas
             // nessa lista, busca-se a aresta com chave igual ao destino do iterador de arestas
-            printf("dentro do ==branco, antes do if aresta == sem classificacao");
+            
             if(grafo.map_do_grafo.at(iterador_arestas->second.origem->idConecta).lista_de_arestas.at(iterador_arestas->second.destino->idConecta).classificacao_aresta == sem_classificacao){
-                // a classificacao da aresta depende da classificacao atual do vertica de destino
-                // se o vertice de destino tiver classificacao atual como branco, a aresta eh uma aresta de arvore
-                // se o vertice de destino tiver classificacao atual como cinza, a aresta eh uma aresta de retorno
-                // o acesso dessas estruturas eh feito da seguinte forma:
-                // acessa-se o adj_list de chave igual ao id conecta do destino para conferir sua classificacao(branco ou cinza)
-                // depois, reescrevemos a classificacao da aresta de acordo com a dos vertices de destino(o acesso da aresta eh identico ao feito no if maior anterior)
-                printf("dentro de clas_vertice==branco, renomeando aresta pra arvore e atualmente numero_arestas_arvore=%d\n", numero_arestas_arvore);
-                grafo.map_do_grafo.at(iterador_arestas->second.origem->idConecta).lista_de_arestas.at(iterador_arestas->second.destino->idConecta).classificacao_aresta = arvore;
-                printf("vou somar o numero_arestas_arvore, atualmente=%d\n", numero_arestas_arvore);
-                numero_arestas_arvore = numero_arestas_arvore + 1;
-                printf("somei o numero_arestas_arvore, atualmente=%d\n", numero_arestas_arvore);
-            }
 
-            printf("chamando a recursao de _busca_em_profundidade com grafo, numero_arestas_arvore=%d e iterador_arestas->second.destino->idConecta=%d\n", numero_arestas_arvore,iterador_arestas->second.destino->idConecta);
+                // como o vertice de destino eh branco, classifica-se como aresta de arvore
+                // o acesso da aresta eh identico ao do if anterior, so reescreve o "sem_classificacao" para "arvore"
+                grafo.map_do_grafo.at(iterador_arestas->second.origem->idConecta).lista_de_arestas.at(iterador_arestas->second.destino->idConecta).classificacao_aresta = arvore;
+                numero_arestas_arvore = numero_arestas_arvore + 1;
+
             // atualizada a aresta, chama-se a recursao nesse vertice de destino, com o mesmo grafo e contador de ciclos
             _busca_em_profundidade(grafo, iterador_arestas->second.destino->idConecta, numero_arestas_arvore);
+            }
         }
     }
+    // apos percorrer toda a lista de adjacencias do vertice chave, finaliza-se reescrevendo-o como preto
     grafo.map_do_grafo.at(chave).v.classificacao_vertice = preto;    
 
     return ;

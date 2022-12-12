@@ -44,16 +44,10 @@ typedef struct grafo_em_struct{
 
 void cria_vertice_reg(reg_dados* reg, vertice& v);
 void cria_aresta(aresta& a,vertice *v_origem, vertice *v_destino,double peso);
-void cria_lista_adj(adj_list* lista, vertice* vin);
-void zera_lista_adj(adj_list& lista);
-int insere_adj_list_no_grafo(adj_list al, vector<adj_list>& graph_als);
-//int insere_adj_list_no_grafo(adj_list* al, vector<adj_list> graph_als);
-void insere_aresta_atual(list<aresta>& l, aresta& a);
 void swap_aresta(aresta& a);
 GRAFO cria_grafo_do_binario(FILE* fp);
 void dijkstra(map<int, adj_list>& grafo, map<int, double>& distancias, map<int, int>& antecessores, int chave_origem);
 int busca_em_profundidade(GRAFO& grafo);
 void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore);
-//int min_value(list<int> S);
 
 #endif

@@ -720,6 +720,11 @@ void comando10()
   fclose(arquivo_indice);
 }
 
+
+/**
+ * @brief funcao responsavel por criar um grafo a partir de um arquivo binario e printar suas informacoes na tela
+ * 
+ */
 void comando11()
 {
   char *nome_arquivo;
@@ -755,7 +760,7 @@ void comando11()
     {
       printf("%d %s %s %s %d %.0lfMbps\n", graph_iterator->second.v.idConecta, graph_iterator->second.v.nomePoPs,
              graph_iterator->second.v.nomePais, graph_iterator->second.v.siglaPais,
-             adj_list_iterator->second.destino->idConecta, adj_list_iterator->second.peso * 1024);
+             adj_list_iterator->second.destino->idConecta, adj_list_iterator->second.peso);
     }
   }
 
@@ -766,6 +771,10 @@ void comando11()
   return;
 }
 
+/**
+ * @brief funcao responsavel por criar um grafo a partir de um arquivo binario, percorre-lo me busca em profundidade e informar a quantidade de ciclos encontrado no grafo
+ * 
+ */
 void comando12(){
   char *nome_arquivo;
   FILE *fp;
@@ -796,6 +805,10 @@ void comando12(){
   numero_ciclos = busca_em_profundidade(grafo);
 
   printCiclos(numero_ciclos);
+
+  free(nome_arquivo);
+  free(h);
+  fclose(fp);
 
   return;
 }
