@@ -900,18 +900,15 @@ void comando14(){
   for(int i = 0; i < num_execucoes; i++){
     scanf("%d %d %d", &pops_origem, &pops_destino, &pops_parada);
 
-    dist1 = dijkstra(grafo.map_do_grafo, pops_origem, pops_parada);
-    dist2 = dijkstra(grafo.map_do_grafo, pops_parada, pops_destino);
+    dist1 = dijkstra(grafo.map_do_grafo, pops_origem, pops_parada);//calcula distância da origem para a parada
+    dist2 = dijkstra(grafo.map_do_grafo, pops_parada, pops_destino);//calcula distância da parada para o destino
 
-    dist_final = dist1 + dist2;
+    dist_final = dist1 + dist2;//distância final é a soma das distâncias
 
-    if(dist1 == INF || dist2 == INF){ // caso desconexo, conexao impossivel
-      printf("Comprimento do caminho entre %d e %d parando em %d: -1\n", pops_origem, pops_destino, pops_parada);
-    }
+    if(dist1 == INF || dist2 == INF) dist_final = -1; // caso desconexo, conexão entre vértices impossivel
 
-    
+    printf("Comprimento do caminho entre %d e %d parando em %d: %.0lf\n", pops_origem, pops_destino, pops_parada, dist_final);
   }
-
   free(nome_arquivo);
   free(novo_reg_cabecalho);
   fclose(arquivo_entrada);
