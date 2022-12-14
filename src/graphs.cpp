@@ -106,66 +106,110 @@ GRAFO cria_grafo_do_binario(FILE* fp){
 }
 
 /**
- * @brief Função responsável por encontrar o menor caminho entre um vértice de origem de um grafo, para todos outros vértices
+ * @brief Função responsável por encontrar o menor caminho entre um vértice de origem de um grafo, para outro vértice
  * do grafo
  * 
  * @param grafo map de listas adjacentes que representa o grafo como um todo
- * @param distancias map que guarda as distancias aos vertices em relação à origem
- * @param antecessores map que guarda os antecessores de cada vertice 
  * @param chave_origem chave que representa o vertice de origem para o algoritmo
+ * @param chave_destino chave que representa o vertice de destino para o algoritmo
  */
-void dijkstra(map<int, adj_list>& grafo, map<int, double>& distancias, map<int, int>& antecessores, int chave_origem){
+double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
 
-    list<int> nao_visitados;//guarda os vertices ainda não visitados
-    int cont = 0;
+    const double INF = numeric_limits<double>::infinity();//declara infinito
+    double distancia = 0.0;
 
-    int menor_chave_nao_visitada;//marca o próximo vertice a ser visitado
-    double INF = 9999999999;
+    map<int, double> dist_map;//map de distâncias para os vértices
 
-    map<int, adj_list>:: iterator grafo_iterator;
-
-    //enquanto não acabar o grafo, insere a key do distancias como idConecta e o valor da distância 99999
-    for(grafo_iterator = grafo.begin(); grafo_iterator != grafo.end(); grafo_iterator++){
-        distancias.insert({grafo_iterator->first, INF});//distancias iniciais a todos vertices
-        antecessores.insert({grafo_iterator->first, -1});//antecessores dos vertices
-        nao_visitados.push_back(grafo_iterator->first);//idConecta dos não visitados
+    //distâncias desconhecidas para cada vértice = Infinito
+    for(auto [key, value]:grafo){
+        dist_map[key] = INF;
     }
-    nao_visitados.sort();//ordena lista primeira vez
 
-    distancias.at(chave_origem) = 0;//iguala-se o dado, isto é, distância
+    //distância origem é 0
+    dist_map[chave_origem] = 0;
 
-    set<int> visitados;//marca os vertices visitados
+    //priority queue organiza automaticamente em função dos vértices com menor peso
+    //usa fila pois parte do princípio de uma bfs
+    priority_queue<pair<double,int>, vector<pair<double, int>>, greater<pair<double,int>>>pq;
 
-    while(!nao_visitados.empty()){//enquanto não acabar os vertices não visitados
-        menor_chave_nao_visitada = nao_visitados.front();//define o menor elemento
-        nao_visitados.pop_front();//remove vertice da fila
-        visitados.insert(menor_chave_nao_visitada);//insere no visitados o ultimo vertice visitado
+    pq.push({0.0, chave_origem});
 
-        map<int, double>::iterator teste_distancias;
-        
-        map<int, aresta>::iterator aresta_iterator;//Define um iterador de arestas
+    while(!pq.empty()){
+        auto [dist, vertice] = pq.top();
+        pq.pop();
 
-        //Utiliza o iterador de arestas para iterar pelas arestas da lista de adjacências do vertice {menor_chave_nao_visitada}
-        for(aresta_iterator = grafo.at(menor_chave_nao_visitada).lista_de_arestas.begin(); aresta_iterator != grafo.at(menor_chave_nao_visitada).lista_de_arestas.end(); aresta_iterator++){
+        //sai do loop se conferindo distâncias além do vértice destino
+        if(vertice == chave_destino){
+            break;
+        }
 
-            //Verifica se a distância imediata do vertice destino da aresta iterada é maior do que a distância do vertice {menor_chave_nao_visitada} + o peso da aresta iterada (dá a distância por um caminho através da menor chave não visitada)
-            if(distancias.at(aresta_iterator->second.destino->idConecta) > (distancias.at(menor_chave_nao_visitada) + aresta_iterator->second.peso)){
+        //checa se já existe uma maneira melhor de alcançar o objetivo
+        if(dist_map[vertice]!=dist){
+            continue;
+        }
 
-                //Altera a distância imediata do vertice destino da aresta iterada para a nova menor distância (passando pelo vértice {menor_chave_nao_visitada})
-                distancias.at(aresta_iterator->second.destino->idConecta) = (distancias.at(menor_chave_nao_visitada) + aresta_iterator->second.peso);
+        for(auto [key, value] : grafo[vertice].lista_de_arestas){
 
-                //Adiciona a menor chave não visitada como antecessor do vertice destino da aresta iterada (como o caminho é através do vertice menor chave nao visitada, o mapa de antecessores explicita que a nova menor distância da aresta iterada passa por {menor_chave_nao_visitada})
-                antecessores.at(aresta_iterator->second.destino->idConecta) = menor_chave_nao_visitada;
+            if(dist_map[key] > value.peso + dist){
+                //atualiza menor distância
+                dist_map[key] = value.peso + dist;
+                pq.push({dist_map[key], key});
             }
         }
-
-        printf("%d° preenchimento de distâncias:\n", cont+1);
-        for(teste_distancias = distancias.begin(); teste_distancias != distancias.end(); teste_distancias++){
-            printf("Vértice: %d ", teste_distancias->first);
-            printf("Distancia: %.0lf\n\n", teste_distancias->second);
-        }
-        cont++;
     }
+
+    return dist_map[chave_destino];
+
+    // list<int> nao_visitados;//guarda os vertices ainda não visitados
+    // int cont = 0;
+
+    // int menor_chave_nao_visitada;//marca o próximo vertice a ser visitado
+    // double INF = numeric_limits<double>::infinity();
+
+    // map<int, adj_list>:: iterator grafo_iterator;
+
+    // //enquanto não acabar o grafo, insere a key do distancias como idConecta e o valor da distância 99999
+    // for(grafo_iterator = grafo.begin(); grafo_iterator != grafo.end(); grafo_iterator++){
+    //     nao_visitados.push_back(grafo_iterator->first);//idConecta dos não visitados
+    // }
+    // nao_visitados.sort();//ordena lista primeira vez
+
+    // set<int> visitados;//marca os vertices visitados
+
+    // while(!nao_visitados.empty()){//enquanto não acabar os vertices não visitados
+    //     menor_chave_nao_visitada = nao_visitados.front();//define o menor elemento
+    //     nao_visitados.pop_front();//remove vertice da fila
+    //     visitados.insert(menor_chave_nao_visitada);//insere no visitados o ultimo vertice visitado
+
+    //     map<int, double>::iterator teste_distancias;
+        
+    //     map<int, aresta>::iterator aresta_iterator;//Define um iterador de arestas
+
+    //     //Utiliza o iterador de arestas para iterar pelas arestas da lista de adjacências do vertice {menor_chave_nao_visitada}
+    //     for(auto aresta: grafo.at(menor_chave_nao_visitada).lista_de_arestas){
+    //         cout << menor_chave_nao_visitada << endl;
+    //         // for(auto i: grafo.at(menor_chave_nao_visitada).lista_de_arestas){
+    //         //     cout<< i.first << " " << endl << i.second.origem->idConecta << " " << i.second.destino->idConecta << endl << i.second.peso << endl <<endl; 
+    //         // }
+    //         //Verifica se a distância imediata do vertice destino da aresta iterada é maior do que a distância do vertice {menor_chave_nao_visitada} + o peso da aresta iterada (dá a distância por um caminho através da menor chave não visitada)
+    //         // if(distancias.at(aresta.second.destino->idConecta) > (distancias.at(menor_chave_nao_visitada) + aresta.second.peso)){
+
+    //         //     //Altera a distância imediata do vertice destino da aresta iterada para a nova menor distância (passando pelo vértice {menor_chave_nao_visitada})
+    //         //     distancias.at(aresta.second.destino->idConecta) = (distancias.at(menor_chave_nao_visitada) + aresta_iterator->second.peso);
+
+    //         //     //Adiciona a menor chave não visitada como antecessor do vertice destino da aresta iterada (como o caminho é através do vertice menor chave nao visitada, o mapa de antecessores explicita que a nova menor distância da aresta iterada passa por {menor_chave_nao_visitada})
+    //         //     antecessores.at(aresta_iterator->second.destino->idConecta) = menor_chave_nao_visitada;
+    //         //     cout<<"entoru"<<endl;
+    //         // }
+    //     }
+
+    //     // printf("%d° preenchimento de distâncias:\n", cont+1);
+    //     // for(teste_distancias = distancias.begin(); teste_distancias != distancias.end(); teste_distancias++){
+    //     //     printf("Vértice: %d ", teste_distancias->first);
+    //     //     printf("Distancia: %.0lf\n\n", teste_distancias->second);
+    //     // }
+    //     cont++;
+    // }
 }
 /**
  * @brief funcao master que comanda a busca_em_profundidade, chama a funcao recursiva da busca em profundidade cada vez que encontra um vertice branco
