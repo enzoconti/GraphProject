@@ -1,8 +1,7 @@
 #include "../include/topologiaRede.h"
 #include "../include/funcionalidades.hpp"
 
-/*7
-Beatriz Aimee Teixeira Furtado Braga - N°USP 12547934 - 100%
+/*
 Enzo Serrano Conti - N°USP 12547145 - 100%
 Rafael Freitas Garcia - N°USP 11222374 - 100%
 */
@@ -49,6 +48,9 @@ int main(){
             break;
         case 12:
             comando12();
+            break;
+        case 13:
+            comando13();
             break;
         case 14:
             comando14();

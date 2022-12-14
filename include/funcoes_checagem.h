@@ -6,6 +6,7 @@
 
 int checa_consistencia(reg_cabecalho*);
 int checa_consistencia_indice(reg_cabecalho_arvore*);
+int checa_consistencia_grafo(reg_cabecalho*);
 int checa_remocao(reg_dados*);
 
 #endif

@@ -782,8 +782,7 @@ void comando12(){
   }
   
   ler_reg_cabecalho(fp, h);
-  if (h->status[0] != '1')
-  {
+  if (h->status[0] != '1'){
     print_falha_grafo();
     free(nome_arquivo);
     free(h);
@@ -800,33 +799,80 @@ void comando12(){
   return;
 }
 
-void comando14(){
+/**
+ * @brief 
+ * 
+ */
+void comando13(){
   char *nome_arquivo;
-  FILE *arquivo_entrada;
   reg_cabecalho* novo_reg_cabecalho = cria_registro_cabecalho();
 
   GRAFO grafo;
-  map<int, double> distancias;
-  map<int, int> antecessores;
 
-  int pops_origem, pops_destino, pops_parada;
-  int dist1, dist2, dist_final;
+  int pops_origem, pops_destino;
+  double dist;
   int num_execucoes = 0;
+
+  const double INF = numeric_limits<double>::infinity();//declara infinito
 
   scanf("%ms", &nome_arquivo);
   scanf("%d", &num_execucoes);
 
+  FILE *arquivo_entrada = abrir_leitura_binario_grafo(nome_arquivo);
+  if(arquivo_entrada == NULL) return;
 
-  arquivo_entrada = fopen(nome_arquivo, "rb");
-  if(arquivo_entrada == NULL) { 
-    print_falha_grafo(); 
-    return;
-  }
-  
   ler_reg_cabecalho(arquivo_entrada, novo_reg_cabecalho);
 
-  if (novo_reg_cabecalho->status[0] != '1'){
-    print_falha_grafo();
+  if(checa_consistencia_grafo(novo_reg_cabecalho) != 0){
+    free(nome_arquivo);
+    free(novo_reg_cabecalho);
+    fclose(arquivo_entrada);
+    return;
+  }
+
+  grafo = cria_grafo_do_binario(arquivo_entrada);
+
+  for(int i = 0; i < num_execucoes; i++){
+    scanf("%d %d %d", &pops_origem, &pops_destino);
+
+    dist = dijkstra(grafo.map_do_grafo, pops_origem, pops_destino);
+
+    if(dist == INF) dist = -1;//caso desconexo, isto é, conexão immpossível
+
+    printf("Fluxo máximo entre %d e %d: %.0lf Mbps\n", pops_origem, pops_destino, dist);
+  }
+
+  free(nome_arquivo);
+  free(novo_reg_cabecalho);
+  fclose(arquivo_entrada);
+}
+
+/**
+ * @brief Função responsável por encontrar o comprimento do caminho mínimo entre dois PoPs, sendo que existe a
+ * necessidade de se passar por um terceiro PoPs. Vale notar que o caminho mínimo é marcado em termos de velocidade em Mbps.
+ * 
+ */
+void comando14(){
+  char *nome_arquivo;
+  reg_cabecalho* novo_reg_cabecalho = cria_registro_cabecalho();
+
+  GRAFO grafo;
+
+  int pops_origem, pops_destino, pops_parada;
+  double dist1, dist2, dist_final;
+  int num_execucoes = 0;
+
+  const double INF = numeric_limits<double>::infinity();//declara infinito
+
+  scanf("%ms", &nome_arquivo);
+  scanf("%d", &num_execucoes);
+
+  FILE *arquivo_entrada = abrir_leitura_binario_grafo(nome_arquivo);
+  if(arquivo_entrada == NULL) return;
+
+  ler_reg_cabecalho(arquivo_entrada, novo_reg_cabecalho);
+
+  if(checa_consistencia_grafo(novo_reg_cabecalho) != 0){
     free(nome_arquivo);
     free(novo_reg_cabecalho);
     fclose(arquivo_entrada);
@@ -838,16 +884,17 @@ void comando14(){
   for(int i = 0; i < num_execucoes; i++){
     scanf("%d %d %d", &pops_origem, &pops_destino, &pops_parada);
 
-    dijkstra(grafo.map_do_grafo, distancias, antecessores, pops_origem);
-    
-    dist1 = distancias.at(pops_parada);
-    printf("Distância 1 é: %d\n", dist1);
+    dist1 = dijkstra(grafo.map_do_grafo, pops_origem, pops_parada);
+    dist2 = dijkstra(grafo.map_do_grafo, pops_parada, pops_destino);
 
     dist_final = dist1 + dist2;
 
-    dist_final = dist1 + dist2;
+    if(dist1 == INF || dist2 == INF) dist_final = -1;//caso desconexo, isto é, conexão immpossível
 
-    printf("Comprimento do caminho entre %d e %d parando em %d: %d Mbps\n", pops_origem, pops_destino, pops_parada, dist_final);
+    printf("Comprimento do caminho entre %d e %d parando em %d: %.0lf Mbps\n", pops_origem, pops_destino, pops_parada, dist_final);
   }
-  
+
+  free(nome_arquivo);
+  free(novo_reg_cabecalho);
+  fclose(arquivo_entrada);
 }
