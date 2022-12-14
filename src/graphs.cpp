@@ -28,6 +28,7 @@ void cria_aresta(aresta& a,vertice *v_origem, vertice *v_destino, double peso){
     a.destino = v_destino;
     a.origem = v_origem;
     a.peso = peso;
+    a.capacidade = peso;
     a.classificacao_aresta = sem_classificacao; // todas arestas sao padronizadas como sem_classificacao ao serem criadas
 }
 
@@ -272,32 +273,79 @@ void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore)
     return ;
 }
 
-void busca_em_largura(GRAFO& grafo, int inicio){
+double busca_em_largura(GRAFO& grafo, int inicio,int destino_final, map<int,int>& caminho){
+    const double INF = numeric_limits<double>::infinity();//declara infinito
+
+    double fluxo_atual, novo_fluxo;
+
     // primeiro definimos o vertice de inicio como visitado
     grafo.map_do_grafo.at(inicio).v.classificacao_vertice = cinza;
-    list<int> fila_chaves; // uma fila das chaves que serao processadas ao longo do algoritmo
+    list<pair<int,double>> fila_chaves_fluxos; // uma fila das chaves que serao processadas ao longo do algoritmo(1o valor) com seus respectivos fluxos ate aqui(2o valor)
 
     int chave_a_ser_processada; // a chave sendo processada em cada iteracao
     
-    fila_chaves.push_back( inicio ); // adicionamos a chave inicial como primeiro elemento da fila
+    fila_chaves_fluxos.push_back( {inicio, INF } ); // adicionamos a chave inicial como primeiro elemento da fila
 
-    while(fila_chaves.empty() == false){
-        // enquanto a fila nao for vazia, consultamos e removemos o primeiro valor da fila (o que foi inserido ha mais tempo, ja que a insercao eh feita sempre no final)
-        chave_a_ser_processada = fila_chaves.front();
-        fila_chaves.pop_front();
+    while(fila_chaves_fluxos.empty() == false){
+        // enquanto a fila nao for vazia, consultamos o primeiro valor da fila, salvando sua chave e valor de fluxo
+        chave_a_ser_processada = fila_chaves_fluxos.front().first;
+        fluxo_atual = fila_chaves_fluxos.front().second;
+
+        // removemos o primeiro valor da fila (o que foi inserido ha mais tempo, ja que a insercao eh feita sempre no final)
+        fila_chaves_fluxos.pop_front();
+        
 
         // iterador_arestas percorre toda lista de adjacencias da chave sendo processada nessa iteracao
         for(auto iterador_arestas = grafo.map_do_grafo.at(chave_a_ser_processada).lista_de_arestas.begin(); iterador_arestas != grafo.map_do_grafo.at(chave_a_ser_processada).lista_de_arestas.end(); iterador_arestas++){
             // se o vertice destino daquela aresta iterada nao tiver sido percorrido, o marcamos como percorrido e inserimos no final da fila
-            if(iterador_arestas->second.destino->classificacao_vertice == branco){
+            if(iterador_arestas->second.destino->classificacao_vertice == branco && iterador_arestas->second.capacidade != 0){
+                // inserimos o par entre a chave de origem e destino no map de caminho
+                //debug//printf("inserindo o elemento %d na chave %d do map de caminho\n", iterador_arestas->second.origem->idConecta, iterador_arestas->second.destino->idConecta);
+                
+                caminho.insert({iterador_arestas->second.destino->idConecta,  iterador_arestas->second.origem->idConecta});
                 iterador_arestas->second.destino->classificacao_vertice = cinza;
-                fila_chaves.push_back(iterador_arestas->second.destino->idConecta);
+
+                novo_fluxo = min(fluxo_atual, iterador_arestas->second.capacidade);
+
+                if(iterador_arestas->second.destino->idConecta == destino_final){
+                    return novo_fluxo;
+                }
+
+                fila_chaves_fluxos.push_back({iterador_arestas->second.destino->idConecta, novo_fluxo});
             }
         }
-
+        
         // apos inserir todos vertices adjacentes na fila, reclassificamos o vertice da chave atual como totalmente percorrido
         grafo.map_do_grafo.at(chave_a_ser_processada).v.classificacao_vertice = preto;
 
     }
 
+    return 0;
+}
+
+double edmon_karp_fluxo_maximo(GRAFO& grafo, int origem, int destino){
+    int fluxo_total = 0, fluxo_recebido;
+    map<int,int> caminho;
+
+    while(fluxo_recebido = busca_em_largura(grafo, origem, destino, caminho)){
+        fluxo_total += fluxo_recebido;
+
+        int chave_iterada_caminho = destino; // chave que vai iterar sobre o caminho recebido alterando o map de capacidades
+        
+        // percorrendo o caminho ao contrario
+        while(chave_iterada_caminho != origem){
+            int chave_pai = caminho.at(chave_iterada_caminho);
+
+            // acessa a aresta na adj_list de chave_pai com key chave_iterada_caminho
+            // isto eh, a aresta [chave_pai] -> [chave_iterada_caminho] que faz parte do caminho encontrado 
+            grafo.map_do_grafo.at(chave_pai).lista_de_arestas.at(chave_iterada_caminho).capacidade -= fluxo_recebido; // decrementa o fluxo recebido da capacidade da aresta encontrada
+            
+            // acessa a aresta inversa para incrementar a capacidade da aresta encontrada
+            //grafo.map_do_grafo.at(chave_iterada_caminho).lista_de_arestas.at(chave_pai).capacidade += fluxo_recebido;
+
+            chave_iterada_caminho = chave_pai; // para iterar sobre o caminho
+        }
+    }
+
+    return fluxo_total;
 }

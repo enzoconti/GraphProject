@@ -342,3 +342,4 @@ void remover_arquivo(char* nome_temp, char* nome_do_arquivo_entrada){
     if (renomear==0 && remover==0) binarioNaTela(nome_do_arquivo_entrada);
     else print_falha_processamento_arquivo();
 }
+

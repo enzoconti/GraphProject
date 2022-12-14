@@ -823,7 +823,7 @@ void comando13(){
   GRAFO grafo;
 
   int pops_origem, pops_destino;
-  double dist;
+  double fluxo;
   int num_execucoes = 0;
 
   const double INF = numeric_limits<double>::infinity();//declara infinito
@@ -845,14 +845,17 @@ void comando13(){
 
   grafo = cria_grafo_do_binario(arquivo_entrada);
 
+ 
   for(int i = 0; i < num_execucoes; i++){
-    scanf("%d %d %d", &pops_origem, &pops_destino);
+    scanf("%d %d", &pops_origem, &pops_destino);
 
-    dist = dijkstra(grafo.map_do_grafo, pops_origem, pops_destino);
+    fluxo = edmon_karp_fluxo_maximo(grafo, pops_origem, pops_destino);
 
-    if(dist == INF) dist = -1;//caso desconexo, isto é, conexão immpossível
-
-    printf("Fluxo máximo entre %d e %d: %.0lf Mbps\n", pops_origem, pops_destino, dist);
+    if(fluxo == 0){ //caso desconexo, isto é, conexão impossível
+      printf("Fluxo máximo entre %d e %d: %.0lf\n", pops_origem, pops_destino, fluxo);
+    } else{
+     printf("Fluxo máximo entre %d e %d: %.0lf Mbps\n", pops_origem, pops_destino, fluxo);
+    }
   }
 
   free(nome_arquivo);
@@ -902,9 +905,11 @@ void comando14(){
 
     dist_final = dist1 + dist2;
 
-    if(dist1 == INF || dist2 == INF) dist_final = -1;//caso desconexo, isto é, conexão immpossível
+    if(dist1 == INF || dist2 == INF){ // caso desconexo, conexao impossivel
+      printf("Comprimento do caminho entre %d e %d parando em %d: -1\n", pops_origem, pops_destino, pops_parada);
+    }
 
-    printf("Comprimento do caminho entre %d e %d parando em %d: %.0lf Mbps\n", pops_origem, pops_destino, pops_parada, dist_final);
+    
   }
 
   free(nome_arquivo);

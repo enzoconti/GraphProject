@@ -28,6 +28,7 @@ typedef struct aresta{
     vertice *origem;
     vertice *destino;
     double peso;
+    double capacidade; // usado no algoritmo de edmon-karp
     classificacao classificacao_aresta=sem_classificacao;
 }aresta;
 
@@ -51,6 +52,6 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino);
 //void dijkstra(map<int, adj_list>& grafo, map<int, double>& distancias, map<int, int>& antecessores, int chave_origem);
 int busca_em_profundidade(GRAFO& grafo);
 void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore);
-void busca_em_largura(GRAFO& grafo, int inicio);
+double busca_em_largura(GRAFO& grafo, int inicio, int destino_final, map<int,int>& caminho);double edmon_karp_fluxo_maximo(GRAFO& grafo, int origem, int destino);
 
 #endif
