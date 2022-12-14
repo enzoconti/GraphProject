@@ -227,3 +227,33 @@ void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore)
 
     return ;
 }
+
+void busca_em_largura(GRAFO& grafo, int inicio){
+    // primeiro definimos o vertice de inicio como visitado
+    grafo.map_do_grafo.at(inicio).v.classificacao_vertice = cinza;
+    list<int> fila_chaves; // uma fila das chaves que serao processadas ao longo do algoritmo
+
+    int chave_a_ser_processada; // a chave sendo processada em cada iteracao
+    
+    fila_chaves.push_back( inicio ); // adicionamos a chave inicial como primeiro elemento da fila
+
+    while(fila_chaves.empty() == false){
+        // enquanto a fila nao for vazia, consultamos e removemos o primeiro valor da fila (o que foi inserido ha mais tempo, ja que a insercao eh feita sempre no final)
+        chave_a_ser_processada = fila_chaves.front();
+        fila_chaves.pop_front();
+
+        // iterador_arestas percorre toda lista de adjacencias da chave sendo processada nessa iteracao
+        for(auto iterador_arestas = grafo.map_do_grafo.at(chave_a_ser_processada).lista_de_arestas.begin(); iterador_arestas != grafo.map_do_grafo.at(chave_a_ser_processada).lista_de_arestas.end(); iterador_arestas++){
+            // se o vertice destino daquela aresta iterada nao tiver sido percorrido, o marcamos como percorrido e inserimos no final da fila
+            if(iterador_arestas->second.destino->classificacao_vertice == branco){
+                iterador_arestas->second.destino->classificacao_vertice = cinza;
+                fila_chaves.push_back(iterador_arestas->second.destino->idConecta);
+            }
+        }
+
+        // apos inserir todos vertices adjacentes na fila, reclassificamos o vertice da chave atual como totalmente percorrido
+        grafo.map_do_grafo.at(chave_a_ser_processada).v.classificacao_vertice = preto;
+
+    }
+
+}

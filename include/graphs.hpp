@@ -49,5 +49,6 @@ GRAFO cria_grafo_do_binario(FILE* fp);
 void dijkstra(map<int, adj_list>& grafo, map<int, double>& distancias, map<int, int>& antecessores, int chave_origem);
 int busca_em_profundidade(GRAFO& grafo);
 void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore);
+void busca_em_largura(GRAFO& grafo, int inicio);
 
 #endif
