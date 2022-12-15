@@ -28,7 +28,6 @@ void cria_aresta(aresta& a,vertice *v_origem, vertice *v_destino, double peso){
     a.destino = v_destino;
     a.origem = v_origem;
     a.peso = peso;
-    a.capacidade = peso;
     a.classificacao_aresta = sem_classificacao; // todas arestas sao padronizadas como sem_classificacao ao serem criadas
 }
 
@@ -107,6 +106,36 @@ GRAFO cria_grafo_do_binario(FILE* fp){
 }
 
 /**
+ * @brief funcao que cria um map de capacidades ja alocado iniciando-o com os pesos das arestas de um grafo
+ * 
+ * @param g grafo em questao
+ * @param capacidade map de capacidade (retornado por referencia)
+ */
+void cria_map_capacidade(GRAFO g, map<pair<int,int>, double>& capacidade){
+    for(auto it = g.map_do_grafo.begin(); it != g.map_do_grafo.end(); it++){
+        for(auto it_arestas = it->second.lista_de_arestas.begin();it_arestas != it->second.lista_de_arestas.end() ; it_arestas++){
+            capacidade.insert({{it_arestas->second.origem->idConecta, it_arestas->second.destino->idConecta}, it_arestas->second.peso});
+        }
+    }
+}
+
+/**
+ * @brief funcao que cria um map de cores de vertice(que indicam se ja foram visitados) a partir de um grafo iniciando todos vertices dados como brancos(nao visitado)
+ * 
+ * @param grafo 
+ * @param cor_vertices map de cores de vertice (retornado por referencia)
+ */
+void cria_cor_vertices(GRAFO grafo, map<int, COR>& cor_vertices){
+    
+    for(auto it = grafo.map_do_grafo.begin(); it != grafo.map_do_grafo.end(); it++){
+        cor_vertices.insert({it->first, branco});
+    }
+
+}
+    
+
+
+/**
  * @brief Função responsável por encontrar o menor caminho entre um vértice de origem de um grafo, para outro vértice
  * do grafo
  * 
@@ -122,7 +151,9 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
     map<int, double> dist_map;//map de distâncias para os vértices
 
     //distâncias desconhecidas para cada vértice = Infinito
-    for(auto [key, value]:grafo){
+    for(auto pair:grafo){
+        auto key = pair.first;
+        auto value = pair.second;
         dist_map[key] = INF;
     }
 
@@ -136,7 +167,8 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
     pq.push({0.0, chave_origem});
 
     while(!pq.empty()){
-        auto [dist, vertice] = pq.top();
+        auto dist = pq.top().first;
+        auto vertice = pq.top().second;
         pq.pop();
 
         //sai do loop se conferindo distâncias além do vértice destino
@@ -149,9 +181,11 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
             continue;
         }
 
-        for(auto [key, value] : grafo[vertice].lista_de_arestas){
+        for(auto pair : grafo[vertice].lista_de_arestas){
+            auto key = pair.first;
+            auto value = pair.second;
 
-            if(dist_map[key] > value.peso + dist){
+            if(dist_map.at(key) > value.peso + dist){
                 //atualiza menor distância
                 dist_map[key] = value.peso + dist;
                 pq.push({dist_map[key], key});
@@ -161,56 +195,6 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
 
     return dist_map[chave_destino];
 
-    // list<int> nao_visitados;//guarda os vertices ainda não visitados
-    // int cont = 0;
-
-    // int menor_chave_nao_visitada;//marca o próximo vertice a ser visitado
-    // double INF = numeric_limits<double>::infinity();
-
-    // map<int, adj_list>:: iterator grafo_iterator;
-
-    // //enquanto não acabar o grafo, insere a key do distancias como idConecta e o valor da distância 99999
-    // for(grafo_iterator = grafo.begin(); grafo_iterator != grafo.end(); grafo_iterator++){
-    //     nao_visitados.push_back(grafo_iterator->first);//idConecta dos não visitados
-    // }
-    // nao_visitados.sort();//ordena lista primeira vez
-
-    // set<int> visitados;//marca os vertices visitados
-
-    // while(!nao_visitados.empty()){//enquanto não acabar os vertices não visitados
-    //     menor_chave_nao_visitada = nao_visitados.front();//define o menor elemento
-    //     nao_visitados.pop_front();//remove vertice da fila
-    //     visitados.insert(menor_chave_nao_visitada);//insere no visitados o ultimo vertice visitado
-
-    //     map<int, double>::iterator teste_distancias;
-        
-    //     map<int, aresta>::iterator aresta_iterator;//Define um iterador de arestas
-
-    //     //Utiliza o iterador de arestas para iterar pelas arestas da lista de adjacências do vertice {menor_chave_nao_visitada}
-    //     for(auto aresta: grafo.at(menor_chave_nao_visitada).lista_de_arestas){
-    //         cout << menor_chave_nao_visitada << endl;
-    //         // for(auto i: grafo.at(menor_chave_nao_visitada).lista_de_arestas){
-    //         //     cout<< i.first << " " << endl << i.second.origem->idConecta << " " << i.second.destino->idConecta << endl << i.second.peso << endl <<endl; 
-    //         // }
-    //         //Verifica se a distância imediata do vertice destino da aresta iterada é maior do que a distância do vertice {menor_chave_nao_visitada} + o peso da aresta iterada (dá a distância por um caminho através da menor chave não visitada)
-    //         // if(distancias.at(aresta.second.destino->idConecta) > (distancias.at(menor_chave_nao_visitada) + aresta.second.peso)){
-
-    //         //     //Altera a distância imediata do vertice destino da aresta iterada para a nova menor distância (passando pelo vértice {menor_chave_nao_visitada})
-    //         //     distancias.at(aresta.second.destino->idConecta) = (distancias.at(menor_chave_nao_visitada) + aresta_iterator->second.peso);
-
-    //         //     //Adiciona a menor chave não visitada como antecessor do vertice destino da aresta iterada (como o caminho é através do vertice menor chave nao visitada, o mapa de antecessores explicita que a nova menor distância da aresta iterada passa por {menor_chave_nao_visitada})
-    //         //     antecessores.at(aresta_iterator->second.destino->idConecta) = menor_chave_nao_visitada;
-    //         //     cout<<"entoru"<<endl;
-    //         // }
-    //     }
-
-    //     // printf("%d° preenchimento de distâncias:\n", cont+1);
-    //     // for(teste_distancias = distancias.begin(); teste_distancias != distancias.end(); teste_distancias++){
-    //     //     printf("Vértice: %d ", teste_distancias->first);
-    //     //     printf("Distancia: %.0lf\n\n", teste_distancias->second);
-    //     // }
-    //     cont++;
-    // }
 }
 /**
  * @brief funcao master que comanda a busca_em_profundidade, chama a funcao recursiva da busca em profundidade cada vez que encontra um vertice branco
@@ -244,6 +228,7 @@ void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore)
     // comecamos setando o vertice em que estamos como cinza, ja que ele foi descoberto
     grafo.map_do_grafo.at(chave).v.classificacao_vertice = cinza; 
     
+    
 
     // definimos um iterador que percorre a lista de arestas do vertice atual
     for(auto iterador_arestas = grafo.map_do_grafo.at(chave).lista_de_arestas.begin(); iterador_arestas != grafo.map_do_grafo.at(chave).lista_de_arestas.end(); iterador_arestas++ ){
@@ -268,18 +253,36 @@ void _busca_em_profundidade(GRAFO& grafo, int chave, int& numero_arestas_arvore)
         }
     }
     // apos percorrer toda a lista de adjacencias do vertice chave, finaliza-se reescrevendo-o como preto
-    grafo.map_do_grafo.at(chave).v.classificacao_vertice = preto;    
+    grafo.map_do_grafo.at(chave).v.classificacao_vertice = preto;  
+      
 
     return ;
 }
 
-double busca_em_largura(GRAFO& grafo, int inicio,int destino_final, map<int,int>& caminho){
+/**
+ * @brief funcao que opera uma busca em largura modificada para o algoritmo de edmon karp - considerando as capacidades de fluxo de cada aresta para que o edmon_karp possa calcular o fluxo maximo por caminhos distintos
+ * 
+ * @param grafo grafo em questao
+ * @param inicio chave do vertice de inicio do fluxo
+ * @param destino_final chave do vertice de destino do fluxo
+ * @param caminho map que guarda o caminho feito pela busca em largura, para que o edmon karp possa alterar as capacidades de fluxo das arestas ja percorridas
+ * @param capacidade map que guarda as capacidades de cada aresta(iniciam em peso e sao decrementadas conforme o algoritmo edmon karp)
+ * @return double 
+ */
+double busca_em_largura(GRAFO& grafo, int inicio,int destino_final, map<int,int>& caminho, map<pair<int,int>, double> capacidade){
     const double INF = numeric_limits<double>::infinity();//declara infinito
+
 
     double fluxo_atual, novo_fluxo;
 
+    // map que contem a cor(informacao se foi visitado) dos vertices
+    map<int, COR> cor_vertices;
+    cria_cor_vertices(grafo, cor_vertices);
+
     // primeiro definimos o vertice de inicio como visitado
-    grafo.map_do_grafo.at(inicio).v.classificacao_vertice = cinza;
+    cor_vertices.at(inicio) = cinza;
+
+
     list<pair<int,double>> fila_chaves_fluxos; // uma fila das chaves que serao processadas ao longo do algoritmo(1o valor) com seus respectivos fluxos ate aqui(2o valor)
 
     int chave_a_ser_processada; // a chave sendo processada em cada iteracao
@@ -297,37 +300,57 @@ double busca_em_largura(GRAFO& grafo, int inicio,int destino_final, map<int,int>
 
         // iterador_arestas percorre toda lista de adjacencias da chave sendo processada nessa iteracao
         for(auto iterador_arestas = grafo.map_do_grafo.at(chave_a_ser_processada).lista_de_arestas.begin(); iterador_arestas != grafo.map_do_grafo.at(chave_a_ser_processada).lista_de_arestas.end(); iterador_arestas++){
-            // se o vertice destino daquela aresta iterada nao tiver sido percorrido, o marcamos como percorrido e inserimos no final da fila
-            if(iterador_arestas->second.destino->classificacao_vertice == branco && iterador_arestas->second.capacidade != 0){
-                // inserimos o par entre a chave de origem e destino no map de caminho
-                //debug//printf("inserindo o elemento %d na chave %d do map de caminho\n", iterador_arestas->second.origem->idConecta, iterador_arestas->second.destino->idConecta);
-                
-                caminho.insert({iterador_arestas->second.destino->idConecta,  iterador_arestas->second.origem->idConecta});
-                iterador_arestas->second.destino->classificacao_vertice = cinza;
+            // se o vertice destino daquela aresta iterada nao tiver sido percorrido E a capacidade nao for nula, o marcamos como percorrido e inserimos no final da fila
+            
 
-                novo_fluxo = min(fluxo_atual, iterador_arestas->second.capacidade);
+            // acessamos as estruturas da seguinte maneira:
+            // pegamos o vertice destino da aresta(key do map de arestas, por isso ->first ) como chave do map de cor_vertices e conferimos se esta branco
+            // pegamos a capacidade na key (origem, destino) da aresta iterada (usamos o ->first denovo para o destino e a origem eh chave_a_ser_processada)
 
-                if(iterador_arestas->second.destino->idConecta == destino_final){
+            if(cor_vertices.at(iterador_arestas->first) == branco && capacidade.at({chave_a_ser_processada, iterador_arestas->first}) > 0){
+                // inserimos o par entre a chave de origem(key do map) e destino(dado do map) no map de caminho
+            
+                auto flag_insercao = caminho.insert({iterador_arestas->first,  chave_a_ser_processada});
+                if(flag_insercao.second == false){
+                    caminho.at({iterador_arestas->first}) = chave_a_ser_processada;
+                }
+
+
+                cor_vertices.at(iterador_arestas->first) = cinza;
+
+                // o fluxo novo eh o minimo entre o fluxo atual e a capacidade recem consultada da nova aresta percorrida
+                novo_fluxo = min(fluxo_atual, capacidade.at({chave_a_ser_processada, iterador_arestas->first}));
+
+                if(iterador_arestas->first == destino_final){
                     return novo_fluxo;
                 }
 
-                fila_chaves_fluxos.push_back({iterador_arestas->second.destino->idConecta, novo_fluxo});
+                fila_chaves_fluxos.push_back({iterador_arestas->first, novo_fluxo});
             }
         }
         
         // apos inserir todos vertices adjacentes na fila, reclassificamos o vertice da chave atual como totalmente percorrido
-        grafo.map_do_grafo.at(chave_a_ser_processada).v.classificacao_vertice = preto;
-
+        cor_vertices.at(chave_a_ser_processada) = preto;
     }
 
     return 0;
 }
 
-double edmon_karp_fluxo_maximo(GRAFO& grafo, int origem, int destino){
+/**
+ * @brief funcao que implementa o algoritmo de edmon_karp para encontrar o fluxo maximo entre dois vertices de um grafo
+ * 
+ * @param grafo grafo em questao
+ * @param origem chave da origem do fluxo
+ * @param destino chave do destino do fluxo
+ * @return double fluxo maximo entre esses dois vertices
+ */
+double edmon_karp_fluxo_maximo(GRAFO grafo, int origem, int destino){
     int fluxo_total = 0, fluxo_recebido;
-    map<int,int> caminho;
+    map<int,int> caminho;                 // map que retornara o caminho encontrado pela busca_em_largura
+    map<pair<int,int>,double> capacidade; // map com chave como par ordenado (origem, destino) e dado double de capacidade
+    cria_map_capacidade(grafo, capacidade); // map criado com capacidades iniciais = peso das arestas
 
-    while(fluxo_recebido = busca_em_largura(grafo, origem, destino, caminho)){
+    while(fluxo_recebido = busca_em_largura(grafo, origem, destino, caminho, capacidade)){ 
         fluxo_total += fluxo_recebido;
 
         int chave_iterada_caminho = destino; // chave que vai iterar sobre o caminho recebido alterando o map de capacidades
@@ -336,15 +359,15 @@ double edmon_karp_fluxo_maximo(GRAFO& grafo, int origem, int destino){
         while(chave_iterada_caminho != origem){
             int chave_pai = caminho.at(chave_iterada_caminho);
 
-            // acessa a aresta na adj_list de chave_pai com key chave_iterada_caminho
-            // isto eh, a aresta [chave_pai] -> [chave_iterada_caminho] que faz parte do caminho encontrado 
-            grafo.map_do_grafo.at(chave_pai).lista_de_arestas.at(chave_iterada_caminho).capacidade -= fluxo_recebido; // decrementa o fluxo recebido da capacidade da aresta encontrada
-            
-            // acessa a aresta inversa para incrementar a capacidade da aresta encontrada
-            //grafo.map_do_grafo.at(chave_iterada_caminho).lista_de_arestas.at(chave_pai).capacidade += fluxo_recebido;
+            // acessa a aresta [chave_pai] -> [chave_iterada_caminho] que faz parte do caminho encontrado 
+            capacidade.at({chave_pai ,chave_iterada_caminho}) -= fluxo_recebido; // decrementa o fluxo recebido da capacidade da aresta encontrada
+        
 
             chave_iterada_caminho = chave_pai; // para iterar sobre o caminho
         }
+
+
+
     }
 
     return fluxo_total;

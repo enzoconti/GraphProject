@@ -34,10 +34,19 @@ void print_registro_inexistente(){
     printf(ERRO_REG_INEXISTENTE);
 }
 
+/**
+ * @brief funcao que printa a mensagem padrao de erro nos algoritmos de grafo
+ * 
+ */
 void print_falha_grafo(){
     printf("Falha na execução da funcionalidade.\n");
 }
 
+/**
+ * @brief funcao que printa a mensagem de quantidade de ciclos apos busca em profundidade
+ * 
+ * @param n numero de ciclos
+ */
 void printCiclos(int n){
     printf("Quantidade de ciclos: %d\n", n);
 }

@@ -813,7 +813,7 @@ void comando12(){
 }
 
 /**
- * @brief 
+ * @brief funcao responsavel por encontrar o fluxo maximo entre n pares de vertices e printa-los um a um 
  * 
  */
 void comando13(){
@@ -844,7 +844,6 @@ void comando13(){
   }
 
   grafo = cria_grafo_do_binario(arquivo_entrada);
-
  
   for(int i = 0; i < num_execucoes; i++){
     scanf("%d %d", &pops_origem, &pops_destino);
@@ -852,10 +851,11 @@ void comando13(){
     fluxo = edmon_karp_fluxo_maximo(grafo, pops_origem, pops_destino);
 
     if(fluxo == 0){ //caso desconexo, isto é, conexão impossível
-      printf("Fluxo máximo entre %d e %d: %.0lf\n", pops_origem, pops_destino, fluxo);
+      printf("Fluxo máximo entre %d e %d: -1\n", pops_origem, pops_destino);
     } else{
      printf("Fluxo máximo entre %d e %d: %.0lf Mbps\n", pops_origem, pops_destino, fluxo);
     }
+
   }
 
   free(nome_arquivo);
@@ -907,6 +907,8 @@ void comando14(){
 
     if(dist1 == INF || dist2 == INF){ // caso desconexo, conexao impossivel
       printf("Comprimento do caminho entre %d e %d parando em %d: -1\n", pops_origem, pops_destino, pops_parada);
+    }else{
+      printf("Comprimento do caminho entre %d e %d parando em %d: %.0lfMbps\n", pops_origem, pops_destino, pops_parada, dist_final);
     }
 
     
