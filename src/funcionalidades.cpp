@@ -734,16 +734,11 @@ void comando11()
 
   scanf("%ms", &nome_arquivo);
 
-  fp = fopen(nome_arquivo, "rb");
-  if(fp == NULL) { 
-    print_falha_grafo(); 
-    return;
-  }
-  
+  fp = abrir_leitura_binario_grafo(nome_arquivo);
+  if(fp == NULL) return;
+
   ler_reg_cabecalho(fp, h);
-  if (h->status[0] != '1')
-  {
-    print_falha_grafo();
+  if (checa_consistencia_grafo(h) != 0){
     free(nome_arquivo);
     free(h);
     fclose(fp);
@@ -754,13 +749,12 @@ void comando11()
 
   map<int, adj_list>::iterator graph_iterator;
   map<int, aresta>::iterator adj_list_iterator;
-  for (graph_iterator = g.map_do_grafo.begin(); graph_iterator != g.map_do_grafo.end(); graph_iterator++)
-  {
-    for (adj_list_iterator = graph_iterator->second.lista_de_arestas.begin(); adj_list_iterator != graph_iterator->second.lista_de_arestas.end(); adj_list_iterator++)
-    {
+
+  for (graph_iterator = g.map_do_grafo.begin(); graph_iterator != g.map_do_grafo.end(); graph_iterator++){
+    for (adj_list_iterator = graph_iterator->second.lista_de_arestas.begin(); adj_list_iterator != graph_iterator->second.lista_de_arestas.end(); adj_list_iterator++){
       printf("%d %s %s %s %d %.0lfMbps\n", graph_iterator->second.v.idConecta, graph_iterator->second.v.nomePoPs,
-             graph_iterator->second.v.nomePais, graph_iterator->second.v.siglaPais,
-             adj_list_iterator->second.destino->idConecta, adj_list_iterator->second.peso);
+                                           graph_iterator->second.v.nomePais, graph_iterator->second.v.siglaPais,
+                                           adj_list_iterator->second.destino->idConecta, adj_list_iterator->second.peso);
     }
   }
 
@@ -884,7 +878,9 @@ void comando14(){
   scanf("%d", &num_execucoes);
 
   FILE *arquivo_entrada = abrir_leitura_binario_grafo(nome_arquivo);
-  if(arquivo_entrada == NULL) return;
+  if(arquivo_entrada == NULL){
+
+  } return;
 
   ler_reg_cabecalho(arquivo_entrada, novo_reg_cabecalho);
 
@@ -907,11 +903,8 @@ void comando14(){
 
     if(dist1 == INF || dist2 == INF){ // caso desconexo, conexao impossivel
       printf("Comprimento do caminho entre %d e %d parando em %d: -1\n", pops_origem, pops_destino, pops_parada);
-    }else{
-      printf("Comprimento do caminho entre %d e %d parando em %d: %.0lfMbps\n", pops_origem, pops_destino, pops_parada, dist_final);
     }
-
-    printf("Comprimento do caminho entre %d e %d parando em %d: %.0lf\n", pops_origem, pops_destino, pops_parada, dist_final);
+    else printf("Comprimento do caminho entre %d e %d parando em %d: %.0lfMbps\n", pops_origem, pops_destino, pops_parada, dist_final);
   }
   free(nome_arquivo);
   free(novo_reg_cabecalho);
