@@ -151,9 +151,9 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
 
     //distâncias desconhecidas para cada vértice = Infinito
     for(auto pair:grafo){
-        auto key = pair.first;
+        auto chave = pair.first;
         auto value = pair.second;
-        dist_map[key] = INF;
+        dist_map[chave] = INF;
     }
 
     //distância origem é 0
@@ -165,10 +165,10 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
 
     fila_prioridade.push({0.0, chave_origem});
 
-    while(!pq.empty()){
-        auto dist = pq.top().first;
-        auto vertice = pq.top().second;
-        pq.pop();
+    while(!fila_prioridade.empty()){
+        auto dist = fila_prioridade.top().first;
+        auto v = fila_prioridade.top().second;//v é um vértice
+        fila_prioridade.pop();
     
         //sai do loop se conferindo distâncias além do vértice destino
         if(v == chave_destino){
@@ -180,11 +180,11 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
             continue;
         }
 
-        for(auto pair : grafo[vertice].lista_de_arestas){
-            auto key = pair.first;
-            auto value = pair.second;
+        for(auto pair : grafo[v].lista_de_arestas){
+            auto chave = pair.first;
+            auto ar = pair.second;//ar é uma aresta
 
-            if(dist_map.at(key) > value.peso + dist){
+            if(dist_map.at(chave) > ar.peso + dist){
                 //atualiza menor distância
                 dist_map[chave] = ar.peso + dist;
                 fila_prioridade.push({dist_map[chave], chave});
