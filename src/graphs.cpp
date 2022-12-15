@@ -146,7 +146,6 @@ void cria_cor_vertices(GRAFO grafo, map<int, COR>& cor_vertices){
 double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
 
     const double INF = numeric_limits<double>::infinity();//declara infinito
-    double distancia = 0.0;
 
     map<int, double> dist_map;//map de distâncias para os vértices
 
@@ -162,22 +161,22 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
 
     //priority queue organiza automaticamente em função dos vértices com menor peso
     //usa fila pois parte do princípio de uma bfs
-    priority_queue<pair<double,int>, vector<pair<double, int>>, greater<pair<double,int>>>pq;
+    priority_queue<pair<double,int>, vector<pair<double, int>>, greater<pair<double,int>>>fila_prioridade;
 
-    pq.push({0.0, chave_origem});
+    fila_prioridade.push({0.0, chave_origem});
 
     while(!pq.empty()){
         auto dist = pq.top().first;
         auto vertice = pq.top().second;
         pq.pop();
-
+    
         //sai do loop se conferindo distâncias além do vértice destino
-        if(vertice == chave_destino){
+        if(v == chave_destino){
             break;
         }
 
         //checa se já existe uma maneira melhor de alcançar o objetivo
-        if(dist_map[vertice]!=dist){
+        if(dist_map[v]!=dist){
             continue;
         }
 
@@ -187,15 +186,15 @@ double dijkstra(map<int, adj_list>& grafo, int chave_origem, int chave_destino){
 
             if(dist_map.at(key) > value.peso + dist){
                 //atualiza menor distância
-                dist_map[key] = value.peso + dist;
-                pq.push({dist_map[key], key});
+                dist_map[chave] = ar.peso + dist;
+                fila_prioridade.push({dist_map[chave], chave});
             }
         }
     }
 
     return dist_map[chave_destino];
-
 }
+
 /**
  * @brief funcao master que comanda a busca_em_profundidade, chama a funcao recursiva da busca em profundidade cada vez que encontra um vertice branco
  * 
