@@ -778,15 +778,11 @@ void comando12(){
 
   scanf("%ms", &nome_arquivo);
 
-  fp = fopen(nome_arquivo, "rb");
-  if(fp == NULL) { 
-    print_falha_grafo(); 
-    return;
-  }
+  fp = abrir_leitura_binario_grafo(nome_arquivo);
+  if(fp == NULL) return;
   
   ler_reg_cabecalho(fp, h);
-  if (h->status[0] != '1'){
-    print_falha_grafo();
+  if (checa_consistencia_grafo(h) != 0){
     free(nome_arquivo);
     free(h);
     fclose(fp);
@@ -879,8 +875,8 @@ void comando14(){
 
   FILE *arquivo_entrada = abrir_leitura_binario_grafo(nome_arquivo);
   if(arquivo_entrada == NULL){
-
-  } return;
+     return;
+  }
 
   ler_reg_cabecalho(arquivo_entrada, novo_reg_cabecalho);
 
